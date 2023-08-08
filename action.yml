@@ -1,11 +1,11 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'dart-package-inspector'
+description: 'Inspect dart/Flutter packages for a certain criteria'
+author: 'Daichi Fujita'
 inputs:
   milliseconds: # change this
     required: true
     description: 'input description here'
     default: 'default value if applicable'
 runs:
-  using: 'node16'
+  using: 'node18'
   main: 'dist/index.js'
