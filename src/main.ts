@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as input from './input'
-import {inspect} from './inspect'
+import {inspect} from './inspection'
 
 const main = (): void => {
   try {

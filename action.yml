@@ -1,13 +1,33 @@
-name: 'dart-package-inspector'
-description: 'Inspect dart/Flutter packages for a certain criteria'
-author: 'fujidaiti'
+name: dart-package-inspector
+description: Inspect dart/Flutter packages for a certain criteria
+author: fujidaiti
 inputs:
   report:
-    description: 'JSON output of pana'
+    description: JSON output of pana
     required: true
   min-pub-points:
-    description: 'Required minimum Pub points'
-    default: 0
+    description: Minimum required Pub points
+  min-convention-points:
+    description: Minimum required points of 'convention' section
+  min-documentation-points:
+    description: Minimum required points of 'documentation' section
+  min-platform-points:
+    description: Minimum required points of 'platform' section
+  min-analysis-points:
+    description: Minimum required points of 'analysis' section
+  min-dependency-points:
+    description: Minimum required points of 'dependency' section
+  dart3-compatible:
+    description: Ensure that the package is dart3 compatible
+    default: true
+  sound-null-safety:
+    description: Ensure that the package is null safety
+    default: true
+  supported-SDKs:
+    description: Ensure that all specified SDKs are supported
+  supported-platforms:
+    description: Ensure that all specified platforms are supported
+
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: node16
+  main: dist/index.js
