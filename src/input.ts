@@ -8,7 +8,7 @@ export type Metrics = {
 
 const getInput = (name: string): string => {
   const value = core.getInput(name)
-  if (value != undefined) return value
+  if (value !== undefined) return value
   throw Error(`Required input '${name}' is missing`)
 }
 
