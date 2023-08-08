@@ -19,6 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          repository: fujidaiti/primer_progress_bar
+          path: test_package
+
+      - uses: axel-op/dart-package-analyzer@v3
+        id: analysis
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          relativePath: test_package/
+
       - uses: ./
         with:
-          milliseconds: 1000
+          report: ${{ steps.analysis.outputs.json_output }}
