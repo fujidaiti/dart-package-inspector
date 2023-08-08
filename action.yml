@@ -1,11 +1,13 @@
 name: 'dart-package-inspector'
 description: 'Inspect dart/Flutter packages for a certain criteria'
-author: 'Daichi Fujita'
+author: 'fujidaiti'
 inputs:
-  milliseconds: # change this
+  report:
+    description: 'JSON output of pana'
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  min-pub-points:
+    description: 'Required minimum Pub points'
+    default: 0
 runs:
   using: 'node18'
   main: 'dist/index.js'
