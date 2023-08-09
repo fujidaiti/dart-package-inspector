@@ -38,7 +38,8 @@ export const getCriteria = (): Criteria => {
   const supportedSDKs: SDK[] = []
   for (const s of peekInput('supported-SDKs')?.split(',') ?? []) {
     const maybeSdk = s.trim()
-    if (!isSDK(maybeSdk)) throw Error("Invalid value for 'supported-SDKs'")
+    if (!isSDK(maybeSdk))
+      throw Error(`Invalid value for 'supported-SDKs': '${maybeSdk}'`)
     supportedSDKs.push(maybeSdk)
   }
 
@@ -46,7 +47,7 @@ export const getCriteria = (): Criteria => {
   for (const s of peekInput('supported-platforms')?.split(',') ?? []) {
     const maybePlatform = s.trim()
     if (!isPlatform(maybePlatform))
-      throw Error("Invalid value for 'supported-platforms'")
+      throw Error(`Invalid value for 'supported-platforms': '${maybePlatform}'`)
     supportedPlatforms.push(maybePlatform)
   }
 
