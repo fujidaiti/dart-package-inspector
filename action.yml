@@ -2,7 +2,7 @@ name: dart-package-inspector
 description: Inspect dart/Flutter packages for a certain criteria
 author: fujidaiti
 branding:
-  icon: smile
+  icon: check-circle
   color: white
 inputs:
   report:
