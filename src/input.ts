@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import {Criteria, Platform, SDK, parsePlatform, parseSDK} from './criteria'
+import {Criteria, Platform, SDK, isPlatform, isSDK} from './criteria'
 import {Report, isTag} from './report'
 
 const peekInput = (name: string): string | undefined => {
@@ -37,17 +37,17 @@ export const getReport = (): Report => {
 export const getCriteria = (): Criteria => {
   const supportedSDKs: SDK[] = []
   for (const s of core.getInput('supported-SDKs').split(',')) {
-    const sdk = parseSDK(s.trim())
-    if (sdk === undefined) throw Error("Invalid value for 'supported-SDKs'")
-    supportedSDKs.push(sdk)
+    const maybeSdk = s.trim()
+    if (!isSDK(maybeSdk)) throw Error("Invalid value for 'supported-SDKs'")
+    supportedSDKs.push(maybeSdk)
   }
 
   const supportedPlatforms: Platform[] = []
   for (const s of core.getInput('supported-platforms').split(',')) {
-    const platform = parsePlatform(s.trim())
-    if (platform === undefined)
+    const maybePlatform = s.trim()
+    if (!isPlatform(maybePlatform))
       throw Error("Invalid value for 'supported-platforms'")
-    supportedPlatforms.push(platform)
+    supportedPlatforms.push(maybePlatform)
   }
 
   const panaOutput = JSON.parse(getRequiredInput('report'))

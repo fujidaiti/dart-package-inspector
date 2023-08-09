@@ -1,8 +1,17 @@
 import {Tag} from './report'
 
-export type SDK = 'flutter' | 'dart'
+const allSDKs = ['flutter', 'dart'] as const
+const allPlatforms = [
+  'ios',
+  'android',
+  'windows',
+  'macos',
+  'linux',
+  'web'
+] as const
 
-export type Platform = 'ios' | 'android' | 'windows' | 'macos' | 'linux' | 'web'
+export type SDK = (typeof allSDKs)[number]
+export type Platform = (typeof allPlatforms)[number]
 
 export type Criteria = {
   supportedSDKs: SDK[]
@@ -19,35 +28,11 @@ export type Criteria = {
   soundNullSafety: boolean
 }
 
-export const parseSDK = (str: string): SDK | undefined => {
-  switch (str) {
-    case 'dart':
-      return 'dart'
-    case 'flutter':
-      return 'flutter'
-    default:
-      return undefined
-  }
-}
+export const isSDK = (x: unknown): x is SDK =>
+  typeof x === 'string' && (allSDKs as readonly string[]).includes(x)
 
-export const parsePlatform = (str: string): Platform | undefined => {
-  switch (str) {
-    case 'ios':
-      return 'ios'
-    case 'android':
-      return 'android'
-    case 'linux':
-      return 'linux'
-    case 'windows':
-      return 'windows'
-    case 'macos':
-      return 'macos'
-    case 'web':
-      return 'web'
-    default:
-      return undefined
-  }
-}
+export const isPlatform = (x: unknown): x is Platform =>
+  typeof x === 'string' && (allPlatforms as readonly string[]).includes(x)
 
 export const platformToTag = (platform: Platform): Tag => {
   switch (platform) {
