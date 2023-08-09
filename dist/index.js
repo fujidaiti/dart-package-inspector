@@ -1,6 +1,56 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 11:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sdkToTag = exports.platformToTag = exports.isPlatform = exports.isSDK = void 0;
+const allSDKs = ['flutter', 'dart'];
+const allPlatforms = [
+    'ios',
+    'android',
+    'windows',
+    'macos',
+    'linux',
+    'web'
+];
+const isSDK = (x) => typeof x === 'string' && allSDKs.includes(x);
+exports.isSDK = isSDK;
+const isPlatform = (x) => typeof x === 'string' && allPlatforms.includes(x);
+exports.isPlatform = isPlatform;
+const platformToTag = (platform) => {
+    switch (platform) {
+        case 'ios':
+            return 'platform:ios';
+        case 'android':
+            return 'platform:android';
+        case 'linux':
+            return 'platform:linux';
+        case 'windows':
+            return 'platform:windows';
+        case 'macos':
+            return 'platform:macos';
+        case 'web':
+            return 'platform:web';
+    }
+};
+exports.platformToTag = platformToTag;
+const sdkToTag = (sdk) => {
+    switch (sdk) {
+        case 'dart':
+            return 'sdk:dart';
+        case 'flutter':
+            return 'sdk:flutter';
+    }
+};
+exports.sdkToTag = sdkToTag;
+
+
+/***/ }),
+
 /***/ 657:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -32,43 +82,138 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCriteria = exports.getReport = void 0;
 const core = __importStar(__nccwpck_require__(186));
-const getInput = (name) => {
+const criteria_1 = __nccwpck_require__(11);
+const report_1 = __nccwpck_require__(269);
+const peekInput = (name) => {
     const value = core.getInput(name);
+    return value.length > 0 ? value : undefined;
+};
+const peekIntInput = (name) => {
+    const value = peekInput(name);
+    if (value !== undefined)
+        return parseInt(value);
+    return undefined;
+};
+const getRequiredInput = (name) => {
+    const value = peekInput(name);
     if (value !== undefined)
         return value;
     throw Error(`Required input '${name}' is missing`);
 };
 const getReport = () => {
-    const result = JSON.parse(getInput('report'));
+    const panaOutput = JSON.parse(getRequiredInput('report'));
     return {
+        tags: panaOutput['tags'].filter(report_1.isTag),
         grantedPoints: {
-            total: result['scores']['grantedPoints']
+            total: panaOutput['scores']['grantedPoints'],
+            convention: panaOutput['report']['sections'][0]['grantedPoints'],
+            documentation: panaOutput['report']['sections'][1]['grantedPoints'],
+            platform: panaOutput['report']['sections'][2]['grantedPoints'],
+            analysis: panaOutput['report']['sections'][3]['grantedPoints'],
+            dependency: panaOutput['report']['sections'][4]['grantedPoints']
         }
     };
 };
 exports.getReport = getReport;
-const getCriteria = () => ({
-    grantedPoints: {
-        total: parseInt(getInput('min-pub-points'))
+const getCriteria = () => {
+    var _a, _b, _c, _d, _e, _f;
+    const supportedSDKs = [];
+    for (const s of core.getInput('supported-SDKs').split(',')) {
+        const maybeSdk = s.trim();
+        if (!(0, criteria_1.isSDK)(maybeSdk))
+            throw Error("Invalid value for 'supported-SDKs'");
+        supportedSDKs.push(maybeSdk);
     }
-});
+    const supportedPlatforms = [];
+    for (const s of core.getInput('supported-platforms').split(',')) {
+        const maybePlatform = s.trim();
+        if (!(0, criteria_1.isPlatform)(maybePlatform))
+            throw Error("Invalid value for 'supported-platforms'");
+        supportedPlatforms.push(maybePlatform);
+    }
+    const panaOutput = JSON.parse(getRequiredInput('report'));
+    return {
+        supportedSDKs,
+        supportedPlatforms,
+        minRequiredPoints: {
+            total: (_a = peekIntInput('min-pub-points')) !== null && _a !== void 0 ? _a : panaOutput['scores']['maxPoints'],
+            convention: (_b = peekIntInput('min-convention-points')) !== null && _b !== void 0 ? _b : panaOutput['report']['sections'][0]['grantedPoints'],
+            documentation: (_c = peekIntInput('min-documentation-points')) !== null && _c !== void 0 ? _c : panaOutput['report']['sections'][1]['grantedPoints'],
+            platform: (_d = peekIntInput('min-platform-points')) !== null && _d !== void 0 ? _d : panaOutput['report']['sections'][2]['grantedPoints'],
+            analysis: (_e = peekIntInput('min-analysis-points')) !== null && _e !== void 0 ? _e : panaOutput['report']['sections'][3]['grantedPoints'],
+            dependency: (_f = peekIntInput('min-dependency-points')) !== null && _f !== void 0 ? _f : panaOutput['report']['sections'][4]['grantedPoints']
+        },
+        dart3Compatible: core.getBooleanInput('dart3-compatible'),
+        soundNullSafety: core.getBooleanInput('sound-null-safety')
+    };
+};
 exports.getCriteria = getCriteria;
 
 
 /***/ }),
 
-/***/ 614:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ 489:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.inspect = void 0;
+const criteria_1 = __nccwpck_require__(11);
 const inspect = (report, criteria) => {
     const errors = [];
-    if (report.grantedPoints.total < criteria.grantedPoints.total) {
-        errors.push(`Required minimum total Pub points is ${criteria.grantedPoints.total}, ` +
+    if (report.grantedPoints.total < criteria.minRequiredPoints.total) {
+        errors.push(`Required minimum total Pub points is ${criteria.minRequiredPoints.total}, ` +
             `but got only ${report.grantedPoints.total} points`);
+    }
+    for (const [grantedPoints, minRequiredPoints, section] of [
+        [
+            report.grantedPoints.analysis,
+            criteria.minRequiredPoints.analysis,
+            'analysis'
+        ],
+        [
+            report.grantedPoints.convention,
+            criteria.minRequiredPoints.convention,
+            'convention'
+        ],
+        [
+            report.grantedPoints.dependency,
+            criteria.minRequiredPoints.dependency,
+            'dependency'
+        ],
+        [
+            report.grantedPoints.documentation,
+            criteria.minRequiredPoints.documentation,
+            'documentation'
+        ],
+        [
+            report.grantedPoints.platform,
+            criteria.minRequiredPoints.platform,
+            'platform'
+        ]
+    ]) {
+        if (grantedPoints < minRequiredPoints) {
+            errors.push(`Required minimum points of '${section}' section is ` +
+                `${minRequiredPoints}, but got only ${grantedPoints} points`);
+        }
+    }
+    for (const platform of criteria.supportedPlatforms) {
+        if (!report.tags.includes((0, criteria_1.platformToTag)(platform))) {
+            errors.push(`The package doesn't support ${platform}`);
+        }
+    }
+    for (const sdk of criteria.supportedSDKs) {
+        if (!report.tags.includes((0, criteria_1.sdkToTag)(sdk))) {
+            errors.push(`The package doesn't support ${sdk} SDK`);
+        }
+    }
+    if (criteria.dart3Compatible &&
+        !report.tags.includes('is:dart3-compatible')) {
+        errors.push('The package is incompatible with dart3');
+    }
+    if (criteria.soundNullSafety && !report.tags.includes('is:null-safe')) {
+        errors.push('The package is not null safety');
     }
     return errors;
 };
@@ -108,10 +253,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const input = __importStar(__nccwpck_require__(657));
-const inspect_1 = __nccwpck_require__(614);
+const inspection_1 = __nccwpck_require__(489);
 const main = () => {
     try {
-        const errors = (0, inspect_1.inspect)(input.getReport(), input.getCriteria());
+        const errors = (0, inspection_1.inspect)(input.getReport(), input.getCriteria());
         for (const error of errors) {
             core.error(error);
         }
@@ -125,6 +270,31 @@ const main = () => {
     }
 };
 main();
+
+
+/***/ }),
+
+/***/ 269:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isTag = void 0;
+const allTags = [
+    'sdk:flutter',
+    'sdk:dart',
+    'platform:ios',
+    'platform:android',
+    'platform:windows',
+    'platform:linux',
+    'platform:macos',
+    'platform:web',
+    'is:null-safe',
+    'is:dart3-compatible'
+];
+const isTag = (str) => typeof str === 'string' && allTags.includes(str);
+exports.isTag = isTag;
 
 
 /***/ }),
