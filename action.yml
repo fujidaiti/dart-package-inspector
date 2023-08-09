@@ -1,6 +1,9 @@
 name: dart-package-inspector
 description: Inspect dart/Flutter packages for a certain criteria
 author: fujidaiti
+branding:
+  icon: smile
+  color: white
 inputs:
   report:
     description: JSON output of pana
