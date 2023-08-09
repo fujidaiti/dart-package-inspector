@@ -32,9 +32,9 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
       
       - uses: fujidaiti/dart-package-inspector@v1
-      	with:
-      		report: ${{ steps.analysis.outputs.json_output }} # Required
-      		min-pub-points: 120
+        with:
+          report: ${{ steps.analysis.outputs.json_output }} # Required
+          min-pub-points: 120
 ```
 
 </br>
