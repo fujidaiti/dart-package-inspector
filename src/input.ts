@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import {Criteria, Platform, SDK, parsePlatform, parseSDK} from './criteria'
-import {Report} from './report'
+import {Report, isTag} from './report'
 
 const peekInput = (name: string): string | undefined => {
   const value = core.getInput(name)
@@ -22,7 +22,7 @@ const getRequiredInput = (name: string): string => {
 export const getReport = (): Report => {
   const panaOutput = JSON.parse(getRequiredInput('report'))
   return {
-    tags: panaOutput['tags'],
+    tags: (panaOutput['tags'] as unknown[]).filter(isTag),
     grantedPoints: {
       total: panaOutput['scores']['grantedPoints'],
       convention: panaOutput['report']['sections'][0]['grantedPoints'],
