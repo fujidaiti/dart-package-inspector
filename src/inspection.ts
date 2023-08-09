@@ -3,8 +3,10 @@ import {Report} from './report'
 
 export const inspect = (report: Report, criteria: Criteria): string[] => {
   const errors: string[] = []
-
-  if (report.grantedPoints.total < criteria.minRequiredPoints.total) {
+  if (
+    criteria.minRequiredPoints.total !== undefined &&
+    report.grantedPoints.total < criteria.minRequiredPoints.total
+  ) {
     errors.push(
       `Required minimum total Pub points is ${criteria.minRequiredPoints.total}, ` +
         `but got only ${report.grantedPoints.total} points`
@@ -37,8 +39,8 @@ export const inspect = (report: Report, criteria: Criteria): string[] => {
       criteria.minRequiredPoints.platform,
       'platform'
     ]
-  ]) {
-    if (grantedPoints < minRequiredPoints) {
+  ] as [number, number | undefined, string][]) {
+    if (minRequiredPoints !== undefined && grantedPoints < minRequiredPoints) {
       errors.push(
         `Required minimum points of '${section}' section is ` +
           `${minRequiredPoints}, but got only ${grantedPoints} points`

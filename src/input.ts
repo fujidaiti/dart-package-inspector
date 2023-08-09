@@ -36,42 +36,30 @@ export const getReport = (): Report => {
 
 export const getCriteria = (): Criteria => {
   const supportedSDKs: SDK[] = []
-  for (const s of core.getInput('supported-SDKs').split(',')) {
+  for (const s of peekInput('supported-SDKs')?.split(',') ?? []) {
     const maybeSdk = s.trim()
     if (!isSDK(maybeSdk)) throw Error("Invalid value for 'supported-SDKs'")
     supportedSDKs.push(maybeSdk)
   }
 
   const supportedPlatforms: Platform[] = []
-  for (const s of core.getInput('supported-platforms').split(',')) {
+  for (const s of peekInput('supported-platforms')?.split(',') ?? []) {
     const maybePlatform = s.trim()
     if (!isPlatform(maybePlatform))
       throw Error("Invalid value for 'supported-platforms'")
     supportedPlatforms.push(maybePlatform)
   }
 
-  const panaOutput = JSON.parse(getRequiredInput('report'))
   return {
     supportedSDKs,
     supportedPlatforms,
     minRequiredPoints: {
-      total:
-        peekIntInput('min-pub-points') ?? panaOutput['scores']['maxPoints'],
-      convention:
-        peekIntInput('min-convention-points') ??
-        panaOutput['report']['sections'][0]['grantedPoints'],
-      documentation:
-        peekIntInput('min-documentation-points') ??
-        panaOutput['report']['sections'][1]['grantedPoints'],
-      platform:
-        peekIntInput('min-platform-points') ??
-        panaOutput['report']['sections'][2]['grantedPoints'],
-      analysis:
-        peekIntInput('min-analysis-points') ??
-        panaOutput['report']['sections'][3]['grantedPoints'],
-      dependency:
-        peekIntInput('min-dependency-points') ??
-        panaOutput['report']['sections'][4]['grantedPoints']
+      total: peekIntInput('min-pub-points'),
+      convention: peekIntInput('min-convention-points'),
+      documentation: peekIntInput('min-documentation-points'),
+      platform: peekIntInput('min-platform-points'),
+      analysis: peekIntInput('min-analysis-points'),
+      dependency: peekIntInput('min-dependency-points')
     },
     dart3Compatible: core.getBooleanInput('dart3-compatible'),
     soundNullSafety: core.getBooleanInput('sound-null-safety')

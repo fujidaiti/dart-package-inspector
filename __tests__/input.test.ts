@@ -54,14 +54,14 @@ test('getCriteria', () => {
   jest.spyOn(core, 'getBooleanInput').mockImplementation(
     (name, _) =>
       ({
-        'dart3-compatible': true,
-        'sound-null-safety': true
+        'dart3-compatible': false,
+        'sound-null-safety': false
       }[name]!)
   )
 
   const expectedResult: Criteria = {
-    dart3Compatible: true,
-    soundNullSafety: true,
+    dart3Compatible: false,
+    soundNullSafety: false,
     supportedPlatforms: ['ios', 'android', 'linux', 'macos', 'windows', 'web'],
     supportedSDKs: ['dart', 'flutter'],
     minRequiredPoints: {
@@ -72,6 +72,40 @@ test('getCriteria', () => {
       analysis: 0,
       dependency: 0
     }
+  }
+
+  expect(getCriteria()).toEqual(expectedResult)
+})
+
+test('getCriteria (with default input)', () => {
+  jest.spyOn(core, 'getInput').mockImplementation(
+    (name, _) =>
+      ({
+        report: JSON.stringify(testPanaOutput),
+        'min-pub-points': '',
+        'min-convention-points': '',
+        'min-documentation-points': '',
+        'min-platform-points': '',
+        'min-analysis-points': '',
+        'min-dependency-points': '',
+        'supported-SDKs': '',
+        'supported-platforms': ''
+      }[name]!)
+  )
+  jest.spyOn(core, 'getBooleanInput').mockImplementation(
+    (name, _) =>
+      ({
+        'dart3-compatible': true,
+        'sound-null-safety': true
+      }[name]!)
+  )
+
+  const expectedResult: Criteria = {
+    dart3Compatible: true,
+    soundNullSafety: true,
+    supportedPlatforms: [],
+    supportedSDKs: [],
+    minRequiredPoints: {}
   }
 
   expect(getCriteria()).toEqual(expectedResult)

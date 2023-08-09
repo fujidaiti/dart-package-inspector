@@ -17,12 +17,12 @@ export type Criteria = {
   supportedSDKs: SDK[]
   supportedPlatforms: Platform[]
   minRequiredPoints: {
-    total: number
-    convention: number
-    documentation: number
-    platform: number
-    analysis: number
-    dependency: number
+    total?: number
+    convention?: number
+    documentation?: number
+    platform?: number
+    analysis?: number
+    dependency?: number
   }
   dart3Compatible: boolean
   soundNullSafety: boolean
