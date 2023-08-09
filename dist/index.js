@@ -116,32 +116,31 @@ const getReport = () => {
 };
 exports.getReport = getReport;
 const getCriteria = () => {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d;
     const supportedSDKs = [];
-    for (const s of core.getInput('supported-SDKs').split(',')) {
+    for (const s of (_b = (_a = peekInput('supported-SDKs')) === null || _a === void 0 ? void 0 : _a.split(',')) !== null && _b !== void 0 ? _b : []) {
         const maybeSdk = s.trim();
         if (!(0, criteria_1.isSDK)(maybeSdk))
-            throw Error("Invalid value for 'supported-SDKs'");
+            throw Error(`Invalid value for 'supported-SDKs': '${maybeSdk}'`);
         supportedSDKs.push(maybeSdk);
     }
     const supportedPlatforms = [];
-    for (const s of core.getInput('supported-platforms').split(',')) {
+    for (const s of (_d = (_c = peekInput('supported-platforms')) === null || _c === void 0 ? void 0 : _c.split(',')) !== null && _d !== void 0 ? _d : []) {
         const maybePlatform = s.trim();
         if (!(0, criteria_1.isPlatform)(maybePlatform))
-            throw Error("Invalid value for 'supported-platforms'");
+            throw Error(`Invalid value for 'supported-platforms': '${maybePlatform}'`);
         supportedPlatforms.push(maybePlatform);
     }
-    const panaOutput = JSON.parse(getRequiredInput('report'));
     return {
         supportedSDKs,
         supportedPlatforms,
         minRequiredPoints: {
-            total: (_a = peekIntInput('min-pub-points')) !== null && _a !== void 0 ? _a : panaOutput['scores']['maxPoints'],
-            convention: (_b = peekIntInput('min-convention-points')) !== null && _b !== void 0 ? _b : panaOutput['report']['sections'][0]['grantedPoints'],
-            documentation: (_c = peekIntInput('min-documentation-points')) !== null && _c !== void 0 ? _c : panaOutput['report']['sections'][1]['grantedPoints'],
-            platform: (_d = peekIntInput('min-platform-points')) !== null && _d !== void 0 ? _d : panaOutput['report']['sections'][2]['grantedPoints'],
-            analysis: (_e = peekIntInput('min-analysis-points')) !== null && _e !== void 0 ? _e : panaOutput['report']['sections'][3]['grantedPoints'],
-            dependency: (_f = peekIntInput('min-dependency-points')) !== null && _f !== void 0 ? _f : panaOutput['report']['sections'][4]['grantedPoints']
+            total: peekIntInput('min-pub-points'),
+            convention: peekIntInput('min-convention-points'),
+            documentation: peekIntInput('min-documentation-points'),
+            platform: peekIntInput('min-platform-points'),
+            analysis: peekIntInput('min-analysis-points'),
+            dependency: peekIntInput('min-dependency-points')
         },
         dart3Compatible: core.getBooleanInput('dart3-compatible'),
         soundNullSafety: core.getBooleanInput('sound-null-safety')
@@ -162,7 +161,8 @@ exports.inspect = void 0;
 const criteria_1 = __nccwpck_require__(11);
 const inspect = (report, criteria) => {
     const errors = [];
-    if (report.grantedPoints.total < criteria.minRequiredPoints.total) {
+    if (criteria.minRequiredPoints.total !== undefined &&
+        report.grantedPoints.total < criteria.minRequiredPoints.total) {
         errors.push(`Required minimum total Pub points is ${criteria.minRequiredPoints.total}, ` +
             `but got only ${report.grantedPoints.total} points`);
     }
@@ -193,7 +193,7 @@ const inspect = (report, criteria) => {
             'platform'
         ]
     ]) {
-        if (grantedPoints < minRequiredPoints) {
+        if (minRequiredPoints !== undefined && grantedPoints < minRequiredPoints) {
             errors.push(`Required minimum points of '${section}' section is ` +
                 `${minRequiredPoints}, but got only ${grantedPoints} points`);
         }
