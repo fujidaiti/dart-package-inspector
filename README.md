@@ -171,6 +171,14 @@ jobs:
 
 </br>
 
+## Error messages
+
+If any requirements are not met, error messages are displayed in the Annotations section on the workflow page.
+
+<img width="865" alt="スクリーンショット 2023-08-09 14 57 32" src="https://github.com/fujidaiti/dart-package-inspector/assets/68946713/ba95ca29-637d-440e-886f-89a75cbb9103">
+
+<br/>
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.

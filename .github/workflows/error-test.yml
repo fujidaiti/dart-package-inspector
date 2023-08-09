@@ -1,0 +1,31 @@
+name: 'error-test'
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+jobs:
+  error-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: axel-op/dart-package-analyzer@v3
+        id: analysis
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          relativePath: example/
+
+      - uses: ./ # Make sure that error messages will shown in the action page
+        with:
+          report: ${{ steps.analysis.outputs.json_output }}
+          min-pub-points: 999
+          min-convention-points: 999
+          min-documentation-points: 999
+          min-platform-points: 999
+          min-analysis-points: 999
+          min-dependency-points: 999
+          supported-SDKs: dart, flutter
+          supported-platforms: ios, android, linux, windows, macos, web
