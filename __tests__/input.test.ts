@@ -49,14 +49,14 @@ test('getCriteria', () => {
         'min-dependency-points': '0',
         'supported-SDKs': 'dart, flutter',
         'supported-platforms': 'ios, android, linux, macos, windows, web'
-      }[name]!)
+      })[name]!
   )
   jest.spyOn(core, 'getBooleanInput').mockImplementation(
     (name, _) =>
       ({
         'dart3-compatible': false,
         'sound-null-safety': false
-      }[name]!)
+      })[name]!
   )
 
   const expectedResult: Criteria = {
@@ -90,14 +90,14 @@ test('getCriteria (with default input)', () => {
         'min-dependency-points': '',
         'supported-SDKs': '',
         'supported-platforms': ''
-      }[name]!)
+      })[name]!
   )
   jest.spyOn(core, 'getBooleanInput').mockImplementation(
     (name, _) =>
       ({
         'dart3-compatible': true,
         'sound-null-safety': true
-      }[name]!)
+      })[name]!
   )
 
   const expectedResult: Criteria = {
