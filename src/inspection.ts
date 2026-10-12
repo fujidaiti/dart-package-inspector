@@ -1,6 +1,18 @@
 import {Criteria, platformToTag, sdkToTag} from './criteria'
 import {Report} from './report'
 
+/**
+ * Lists the failed (`[x]`) and partially passed (`[~]`) checks found in the
+ * section summaries, one check per line.
+ * Returns an empty string if there are no such checks.
+ */
+const describeLostPoints = (sectionSummaries: string[]): string =>
+  sectionSummaries
+    .flatMap(summary => summary.split('\n'))
+    .filter(line => /^### \[(x|~)\]/.test(line))
+    .map(line => `\n  - ${line.replace(/^### /, '').trim()}`)
+    .join('')
+
 export const inspect = (report: Report, criteria: Criteria): string[] => {
   const errors: string[] = []
   if (
@@ -9,7 +21,8 @@ export const inspect = (report: Report, criteria: Criteria): string[] => {
   ) {
     errors.push(
       `Required minimum total Pub points is ${criteria.minRequiredPoints.total}, ` +
-        `but got only ${report.grantedPoints.total} points`
+        `but got only ${report.grantedPoints.total} points` +
+        describeLostPoints(report.sections.map(s => s.summary))
     )
   }
 
@@ -43,7 +56,10 @@ export const inspect = (report: Report, criteria: Criteria): string[] => {
     if (minRequiredPoints !== undefined && grantedPoints < minRequiredPoints) {
       errors.push(
         `Required minimum points of '${section}' section is ` +
-          `${minRequiredPoints}, but got only ${grantedPoints} points`
+          `${minRequiredPoints}, but got only ${grantedPoints} points` +
+          describeLostPoints(
+            report.sections.filter(s => s.id === section).map(s => s.summary)
+          )
       )
     }
   }

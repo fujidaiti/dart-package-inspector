@@ -30,7 +30,14 @@ test('getReport', () => {
       'platform:web',
       'is:null-safe',
       'is:dart3-compatible'
-    ]
+    ],
+    sections: testPanaOutput.report.sections.map(s => ({
+      id: s.id,
+      title: s.title,
+      grantedPoints: s.grantedPoints,
+      maxPoints: s.maxPoints,
+      summary: s.summary
+    }))
   }
 
   expect(getReport()).toEqual(expectedResult)
