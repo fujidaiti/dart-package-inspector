@@ -112,15 +112,32 @@ const getRequiredInput = (name) => {
 };
 const getReport = () => {
     const panaOutput = JSON.parse(getRequiredInput('report'));
+    const sections = panaOutput['report']['sections'].map(s => {
+        var _a;
+        return ({
+            id: s['id'],
+            title: s['title'],
+            grantedPoints: s['grantedPoints'],
+            maxPoints: s['maxPoints'],
+            summary: (_a = s['summary']) !== null && _a !== void 0 ? _a : ''
+        });
+    });
+    const pointsOf = (id) => {
+        const section = sections.find(s => s.id === id);
+        if (section !== undefined)
+            return section.grantedPoints;
+        throw Error(`Section '${id}' is missing in the report`);
+    };
     return {
         tags: panaOutput['tags'].filter(report_1.isTag),
+        sections,
         grantedPoints: {
             total: panaOutput['scores']['grantedPoints'],
-            convention: panaOutput['report']['sections'][0]['grantedPoints'],
-            documentation: panaOutput['report']['sections'][1]['grantedPoints'],
-            platform: panaOutput['report']['sections'][2]['grantedPoints'],
-            analysis: panaOutput['report']['sections'][3]['grantedPoints'],
-            dependency: panaOutput['report']['sections'][4]['grantedPoints']
+            convention: pointsOf('convention'),
+            documentation: pointsOf('documentation'),
+            platform: pointsOf('platform'),
+            analysis: pointsOf('analysis'),
+            dependency: pointsOf('dependency')
         }
     };
 };
@@ -169,12 +186,23 @@ exports.getCriteria = getCriteria;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.inspect = void 0;
 const criteria_1 = __nccwpck_require__(439);
+/**
+ * Lists the failed (`[x]`) and partially passed (`[~]`) checks found in the
+ * section summaries, one check per line.
+ * Returns an empty string if there are no such checks.
+ */
+const describeLostPoints = (sectionSummaries) => sectionSummaries
+    .flatMap(summary => summary.split('\n'))
+    .filter(line => /^### \[(x|~)\]/.test(line))
+    .map(line => `\n  - ${line.replace(/^### /, '').trim()}`)
+    .join('');
 const inspect = (report, criteria) => {
     const errors = [];
     if (criteria.minRequiredPoints.total !== undefined &&
         report.grantedPoints.total < criteria.minRequiredPoints.total) {
         errors.push(`Required minimum total Pub points is ${criteria.minRequiredPoints.total}, ` +
-            `but got only ${report.grantedPoints.total} points`);
+            `but got only ${report.grantedPoints.total} points` +
+            describeLostPoints(report.sections.map(s => s.summary)));
     }
     for (const [grantedPoints, minRequiredPoints, section] of [
         [
@@ -205,7 +233,8 @@ const inspect = (report, criteria) => {
     ]) {
         if (minRequiredPoints !== undefined && grantedPoints < minRequiredPoints) {
             errors.push(`Required minimum points of '${section}' section is ` +
-                `${minRequiredPoints}, but got only ${grantedPoints} points`);
+                `${minRequiredPoints}, but got only ${grantedPoints} points` +
+                describeLostPoints(report.sections.filter(s => s.id === section).map(s => s.summary)));
         }
     }
     for (const platform of criteria.supportedPlatforms) {
@@ -270,25 +299,50 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(484));
 const input = __importStar(__nccwpck_require__(868));
 const inspection_1 = __nccwpck_require__(140);
-const main = () => {
+const main = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const errors = (0, inspection_1.inspect)(input.getReport(), input.getCriteria());
+        const report = input.getReport();
+        const errors = (0, inspection_1.inspect)(report, input.getCriteria());
         for (const error of errors) {
             core.error(error);
         }
         if (errors.length > 0) {
             core.setFailed('Some requirements are not met.');
+            core.summary
+                .addHeading('Dart package inspection failed')
+                .addList(errors.map(e => e.split('\n')[0]));
+            // Show pana's explanation for each section that lost points.
+            for (const section of report.sections) {
+                if (section.grantedPoints < section.maxPoints) {
+                    core.summary
+                        .addHeading(`${section.title} (${section.grantedPoints}/${section.maxPoints})`, 2)
+                        // A blank line is required after the HTML heading,
+                        // or the Markdown below is not rendered.
+                        .addEOL()
+                        .addRaw(section.summary, true);
+                }
+            }
+            yield core.summary.write();
         }
     }
     catch (error) {
         if (error instanceof Error)
             core.setFailed(error.message);
     }
-};
+});
 main();
 
 

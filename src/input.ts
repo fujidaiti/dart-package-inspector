@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import {Criteria, Platform, SDK, isPlatform, isSDK} from './criteria'
-import {Report, isTag} from './report'
+import {Report, Section, isTag} from './report'
 
 const peekInput = (name: string): string | undefined => {
   const value = core.getInput(name)
@@ -21,15 +21,30 @@ const getRequiredInput = (name: string): string => {
 
 export const getReport = (): Report => {
   const panaOutput = JSON.parse(getRequiredInput('report'))
+  const sections: Section[] = (
+    panaOutput['report']['sections'] as Record<string, unknown>[]
+  ).map(s => ({
+    id: s['id'] as string,
+    title: s['title'] as string,
+    grantedPoints: s['grantedPoints'] as number,
+    maxPoints: s['maxPoints'] as number,
+    summary: (s['summary'] as string | undefined) ?? ''
+  }))
+  const pointsOf = (id: string): number => {
+    const section = sections.find(s => s.id === id)
+    if (section !== undefined) return section.grantedPoints
+    throw Error(`Section '${id}' is missing in the report`)
+  }
   return {
     tags: (panaOutput['tags'] as unknown[]).filter(isTag),
+    sections,
     grantedPoints: {
       total: panaOutput['scores']['grantedPoints'],
-      convention: panaOutput['report']['sections'][0]['grantedPoints'],
-      documentation: panaOutput['report']['sections'][1]['grantedPoints'],
-      platform: panaOutput['report']['sections'][2]['grantedPoints'],
-      analysis: panaOutput['report']['sections'][3]['grantedPoints'],
-      dependency: panaOutput['report']['sections'][4]['grantedPoints']
+      convention: pointsOf('convention'),
+      documentation: pointsOf('documentation'),
+      platform: pointsOf('platform'),
+      analysis: pointsOf('analysis'),
+      dependency: pointsOf('dependency')
     }
   }
 }
